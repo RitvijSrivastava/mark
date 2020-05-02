@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "459439242539",
+    "firebase_url": "https://inngrow-tech.firebaseio.com",
+    "project_id": "inngrow-tech",
+    "storage_bucket": "inngrow-tech.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459439242539:android:9bddfcda8995dbd47d996e",
+        "android_client_info": {
+          "package_name": "com.example.attendance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "459439242539-t14d7psrirf7oq78mi2n4d8s0de47vio.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLBbR_f6X4rCpy3NAanZF29nZVLHwDI40"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "459439242539-t14d7psrirf7oq78mi2n4d8s0de47vio.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
