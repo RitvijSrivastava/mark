@@ -18,6 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List appBarTitle = ['Mark Attendance', 'Attendance History', 'My Profile', 'Help'];
   int _currentIndex = 0;
   PageController _pageController;
 
@@ -47,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mark Attendance"),
+        title: Text(appBarTitle[_currentIndex]),
       ),
       body: PageView(
         controller: _pageController,

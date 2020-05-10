@@ -15,37 +15,48 @@ class _HelpPageState extends State<HelpPage> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(
-              "Facing Issues?",
-              textScaleFactor: 1.5,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: Center(
+                child: Image.asset('assets/logo.png'),
               ),
             ),
-            SizedBox(height: 20.0),
-            RichText(
-              textScaleFactor: 1.2,
-              text: TextSpan(children: [
-                TextSpan(
-                  text: "Send your queries at: ",
+            SizedBox(height: 100.0),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  "Facing Issues?",
+                  textScaleFactor: 1.5,
                   style: TextStyle(
                     color: Colors.black,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextSpan(
-                    text: "query@marks-retech.in",
-                    style: TextStyle(
-                      color: Colors.blue,
+                SizedBox(height: 20.0),
+                RichText(
+                  textScaleFactor: 1.2,
+                  text: TextSpan(children: [
+                    TextSpan(
+                      text: "Send your queries at: ",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                     ),
-                    recognizer: new TapGestureRecognizer()
-                      ..onTap = () {
-                        launch(_url);
-                      }),
-              ]),
+                    TextSpan(
+                        text: "query@marks-retech.in",
+                        style: TextStyle(
+                          color: Colors.blue,
+                        ),
+                        recognizer: new TapGestureRecognizer()
+                          ..onTap = () {
+                            launch(_url);
+                          }),
+                  ]),
+                ),
+              ],
             ),
           ],
         ),

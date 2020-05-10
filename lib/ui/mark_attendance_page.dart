@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
+// TODO: Mapbox in location
+
 class MarkAttendancePage extends StatefulWidget {
   final String userId;
 
@@ -152,34 +154,51 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
                 color: Colors.red,
               ),
             )
-          : Container(
-              margin: EdgeInsets.only(
-                top: 10.0,
-              ),
-              child: Stepper(
-                onStepContinue: next,
-                type: StepperType.vertical,
-                currentStep: _currentStep,
-                steps: <Step>[
-                  Step(
-                    title: Text("Face Verification"),
-                    content: MaterialButton(
-                      onPressed: verifyFace,
-                      textColor: Colors.white,
-                      child: Text(msgFace),
-                      color: Colors.green,
-                    ),
-                    isActive: (_currentStep == 0),
-                  ),
-                  Step(
-                    title: Text("Location Verification"),
-                    content: MaterialButton(
-                      onPressed: verifyFace,
-                      textColor: Colors.white,
-                      child: Text(msgLocation),
-                      color: Colors.green,
-                    ),
-                    isActive: (_currentStep == 1),
+          : Padding(
+              padding: const EdgeInsets.fromLTRB(10.0,30.0,10.0,10.0),
+              child: ListView(
+                // margin: EdgeInsets.only(top: 10.0),
+                children: [
+                  Stepper(
+                    onStepContinue: next,
+                    type: StepperType.vertical,
+                    currentStep: _currentStep,
+                    steps: <Step>[
+                      Step(
+                        title: Text(
+                          "Face Verification",
+                          textScaleFactor: 1.3,
+                        ),
+                        content: MaterialButton(
+                          padding: EdgeInsets.all(13.0),
+                          onPressed: verifyFace,
+                          textColor: Colors.white,
+                          child: Text(
+                            msgFace,
+                            textScaleFactor: 1.1,
+                          ),
+                          color: Colors.green,
+                        ),
+                        isActive: (_currentStep == 0),
+                      ),
+                      Step(
+                        title: Text(
+                          "Location Verification",
+                          textScaleFactor: 1.3,
+                        ),
+                        content: MaterialButton(
+                          padding: EdgeInsets.all(13.0),
+                          onPressed: verifyFace,
+                          textColor: Colors.white,
+                          child: Text(
+                            msgLocation,
+                            textScaleFactor: 1.1,
+                          ),
+                          color: Colors.green,
+                        ),
+                        isActive: (_currentStep == 1),
+                      ),
+                    ],
                   ),
                 ],
               ),
