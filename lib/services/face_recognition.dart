@@ -57,8 +57,8 @@ class FaceRecognition {
     return response;
   }
 
-  //Recognize Image
-  Future<Response> recogImage(File file) async {
+  /// Returns [true] if confidence > 65% and imageId = name
+  Future<bool> recogImage(File file, String imageId) async {
     // TODO: Receive the store name also
 
     dio.options.headers = {
@@ -90,6 +90,15 @@ class FaceRecognition {
       }
     }
 
-    return response;
+    Map<String, dynamic> parseResponse = jsonDecode(response.toString());
+    if(parseResponse['images'] == null) return false;
+
+    String _confi = parseResponse['images'][0]['candidates'][0]['confidence'].toString();
+    double confidence =  double.parse(_confi) * 100.0;
+
+    String subjectId = parseResponse['images'][0]['candidates'][0]['subject_id'];
+
+    return (confidence > 65  && subjectId == imageId);
+
   }
 }
