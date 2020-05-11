@@ -9,12 +9,9 @@ class FirebaseStorageService {
   Future<dynamic> uploadFile(File image) async {
     StorageReference storageReference = FirebaseStorage.instance.ref().child('users/${Path.basename(image.path)}');
     StorageUploadTask uploadTask = storageReference.putFile(image);
-    await uploadTask.onComplete;
-    print("File Uploaded!");
-    storageReference.getDownloadURL().then((fileURL) {
-      print("FILE: " + fileURL);
-      return fileURL;
-    });
+    String url = await (await uploadTask.onComplete).ref.getDownloadURL();
+    print("FILE: " + url);
+    return url;
   }
 
 }

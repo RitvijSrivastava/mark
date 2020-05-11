@@ -6,7 +6,9 @@ import 'package:attendance/services/authentication.dart';
 import 'package:attendance/services/face_recognition.dart';
 import 'package:attendance/services/firebase_service.dart';
 import 'package:attendance/services/firebase_storage_service.dart';
+import 'package:attendance/services/validate.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AdminPage extends StatefulWidget {
@@ -20,89 +22,166 @@ class AdminPage extends StatefulWidget {
 }
 
 class _AdminPageState extends State<AdminPage> {
-
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>(); // Form Key
 
-  File _image; // Stores the image
+  bool _isUploading = false;
+  bool _isUserForm = false;
 
-  /// Callback to the form to process the information and upload it to the DB
-  void formCallback(
-      {String email,
-      String password,
-      String latitude,
-      String longitude,
-      File image,
-      String firstName,
-      String lastName,
-      String radius}) async {
-    FirebaseService firebaseService = new FirebaseService();
-    FaceRecognition faceRecognition = new FaceRecognition();
+  Validate validate = new Validate();
 
-    String userUID = ""; // Store the uid of the user created
-    //Create a user first
-    if (email != null && password != null) {
-      userUID = await widget.auth.signUp(email, password);
-    } else {
-      return;
-    }
+  File image;
+  String firstName,
+      lastName,
+      emailId,
+      password,
+      experience,
+      expertise,
+      imageId,
+      userId,
+      mobile,
+      aadhar,
+      address,
+      radius,
+      latitude,
+      longitude;
 
-    //upload the image to the database
-    var imageURL = await uploadFile(image);
+  String _msgLocation;
+  String _msgImage;
 
-    //Enroll the image to the KAIROS database
-    await faceRecognition.enrollImage(image, userUID);
-
-    List location = new List();
-    location.add(latitude);
-    location.add(longitude);
-
-    // Create its employee database
-    Employee emp = new Employee(
-      userId: userUID,
-      storeId: "abc",
-      imageId: imageURL.toString(),
-      firstName: firstName,
-      lastName: lastName,
-      emailId: email,
-      phoneNumber: "9653049126",
-      specialization: "Haircut",
-      aadharNumber: "12345678910",
-      address: "Rail Nagaar",
-      experience: "3",
-      radius: radius,
-      location: location,
-    );
-
-    //Create a map of employee
-    Map<String, dynamic> map = emp.toMap();
-
-    //Upload it to the firebase
-    firebaseService.updateData(userUID, 'employees', map);
-
-    User user = new User(emailId: email, userId: userUID);
-    map = emp.toMap();
-
-    firebaseService.updateData(userUID, 'users', map);
-
-  }
+  bool _autoValidate = false;
 
   @override
   void initState() {
     super.initState();
-    _image = null;
+  }
+
+  /// Upload Data to Firebase Storage
+  _uploadToFirebase() async {
+    FirebaseService firebaseService = new FirebaseService();
+    FaceRecognition faceRecognition = new FaceRecognition();
+
+    // Create a user
+    userId = await widget.auth.signUp(emailId, password);
+
+    // Upload Image
+    String imageId = await _uploadImage(image);
+
+    // Upload the image to image recognition api
+    await faceRecognition.enrollImage(image, userId);
+
+    // Create a User and Map
+    User user = new User(
+      userId: userId,
+      emailId: emailId,
+    );
+    Map<String, dynamic> userMap = user.toMap();
+
+    // Create location list
+    List location = new List();
+    location.add(latitude);
+    location.add(longitude);
+
+    // Create an employee and its map
+    Employee emp = new Employee(
+      userId: userId,
+      firstName: firstName,
+      lastName: lastName,
+      storeId: "123",
+      imageId: imageId,
+      emailId: emailId,
+      phoneNumber: mobile,
+      specialization: expertise,
+      aadharNumber: aadhar,
+      address: address,
+      experience: experience,
+      radius: radius,
+      location: location,
+    );
+
+    //Create employee map
+    Map<String, dynamic> empMap = emp.toMap();
+
+    //Upload to firebase
+    await firebaseService.addData("users", userMap);
+    await firebaseService.addSpecificData("employees", userId, empMap);
+  }
+
+  /// Submit form after validating it
+  _submitForm() async {
+    if (_formKey.currentState.validate() &&
+        latitude != null &&
+        longitude != null &&
+        validate.verifyImage(image) == null) {
+      // Save form
+      _formKey.currentState.save();
+
+      //Set isUploading to true
+      setState(() {
+        _isUploading = true;
+      });
+
+      // upload files to firebase
+      await _uploadToFirebase();
+
+      //toggleForm
+      _toggleForm();
+    } else {
+      _msgLocation = null;
+      _msgImage = null;
+
+      String msg1, msg2;
+
+      if (latitude == null) msg1 = "Location Not Found";
+      if (image == null) msg2 = "Image Not Found";
+      setState(() {
+        _autoValidate = true;
+        _msgLocation = msg1;
+        _msgImage = msg2;
+      });
+    }
   }
 
   /// Uploads an image to Firebase Storage
-  uploadFile(File image) async {
+  _uploadImage(File image) async {
     return await new FirebaseStorageService().uploadFile(image);
   }
 
-  /// Use ImagePicker to pick an image from the camera
-  Future chooseFile() async {
-    await ImagePicker.pickImage(source: ImageSource.camera).then((image) {
+  /// Get Location using Geolocator
+  Future _getLocation() async {
+    await Geolocator().getCurrentPosition().then((position) {
       setState(() {
-        _image = image;
+        latitude = position.latitude.toString();
+        longitude = position.longitude.toString();
       });
+    });
+  }
+
+  /// Use ImagePicker to pick an image from the camera
+  Future _chooseImage() async {
+    await ImagePicker.pickImage(
+      source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.front,
+    ).then((img) {
+      setState(() {
+        image = img;
+      });
+    });
+  }
+
+  /// Reset Form
+  _resetForm() {
+    // _formKey.currentState.reset();
+    setState(() {
+      _autoValidate = false;
+      _isUploading = false;
+    });
+  }
+
+  /// Toggle visibility of user form
+  _toggleForm() {
+    _resetForm();
+    setState(() {
+      _isUserForm = !_isUserForm;
     });
   }
 
@@ -111,15 +190,259 @@ class _AdminPageState extends State<AdminPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Admin Page"),
+        actions: <Widget>[
+          IconButton(
+            onPressed: widget.logoutCallback,
+            icon: Icon(Icons.exit_to_app),
+          ),
+        ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          children: <Widget>[
-
-          ],
-        ),
-      ),
+      body: _isUserForm
+          ? formUI()
+          : Center(
+              child: MaterialButton(
+                color: Colors.lightBlue,
+                padding: EdgeInsets.all(16.0),
+                onPressed: _toggleForm,
+                child: Text(
+                  "Add Employee",
+                  textScaleFactor: 1.2,
+                ),
+              ),
+            ),
     );
+  }
+
+  /// Adds a constant space between two widgets
+  Widget _buildSpace({double height = 15.0}) {
+    return SizedBox(
+      height: height,
+    );
+  }
+
+  ///Form UI
+  Widget formUI() {
+    return _isUploading
+        ? Center(
+            child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CircularProgressIndicator(),
+              _buildSpace(),
+              Text(
+                "Uploading...",
+                textScaleFactor: 1.5,
+              ),
+            ],
+          ))
+        : SingleChildScrollView(
+            child: Container(
+              margin: EdgeInsets.all(15.0),
+              child: Form(
+                  key: _formKey,
+                  autovalidate: _autoValidate,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (name) => validate.verifyName(name),
+                        onSaved: (value) {
+                          firstName = value;
+                        },
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "First Name",
+                          hintText: "John",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (name) => validate.verifyName(name),
+                        onSaved: (value) {
+                          lastName = value;
+                        },
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Last Name",
+                          hintText: "Doe",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (email) => validate.verifyEmail(email),
+                        onSaved: (value) {
+                          emailId = value;
+                        },
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Email Name",
+                          hintText: "you@example.com",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (password) =>
+                            validate.verifyPassword(password),
+                        onSaved: (value) {
+                          password = value;
+                        },
+                        keyboardType: TextInputType.visiblePassword,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Password",
+                          hintText: "P@ssword!123",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (addr) => validate.verifyAddress(addr),
+                        onSaved: (value) {
+                          address = value;
+                        },
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Address",
+                          hintText: "123/131/J, Nagar",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (mobile) => validate.verfiyMobile(mobile),
+                        onSaved: (value) {
+                          mobile = value;
+                        },
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Mobile Number",
+                          hintText: "9450032010",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (add) => validate.verifyAadhar(add),
+                        onSaved: (value) {
+                          aadhar = value;
+                        },
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Aadhar Number",
+                          hintText: "123456789376",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (exp) => validate.verifyExpertise(exp),
+                        onSaved: (value) {
+                          expertise = value;
+                        },
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Expertise",
+                          hintText: "Haircut",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (exp) => validate.verifyExperience(exp),
+                        onSaved: (value) {
+                          experience = value;
+                        },
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Experience (in  years)",
+                          hintText: "2",
+                        ),
+                      ),
+                      _buildSpace(),
+                      TextFormField(
+                        minLines: 1,
+                        maxLines: 8,
+                        validator: (rad) => validate.verifyRadius(rad),
+                        onSaved: (value) {
+                          radius = value;
+                        },
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Radius (in meters)",
+                          hintText: "10",
+                        ),
+                      ),
+                      _buildSpace(height: 20.0),
+                      MaterialButton(
+                        color: Colors.blueAccent,
+                        onPressed: _chooseImage,
+                        child: Column(
+                          children: <Widget>[
+                            Text("Choose Image"),
+                            SizedBox(height: 5.0),
+                            _msgImage == null
+                                ? Center()
+                                : Text(
+                                    _msgImage,
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                          ],
+                        ),
+                      ),
+                      _buildSpace(),
+                      MaterialButton(
+                        onPressed: _getLocation,
+                        color: Colors.greenAccent,
+                        child: Column(
+                          children: <Widget>[
+                            Text("Get Location"),
+                            SizedBox(height: 5.0),
+                            _msgLocation == null
+                                ? Center()
+                                : Text(
+                                    _msgLocation,
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                          ],
+                        ),
+                      ),
+                      _buildSpace(height: 20.0),
+                      Center(
+                        child: MaterialButton(
+                          onPressed: _submitForm,
+                          color: Colors.blue,
+                          child: Text(
+                            "SUBMIT",
+                            textScaleFactor: 1.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+            ),
+          );
   }
 }

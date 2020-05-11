@@ -119,7 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       CircleAvatar(
-                        backgroundImage: NetworkImage(emp.image),
+                        backgroundImage: NetworkImage(emp.image, scale: 0.5),
                         radius: 80.0,
                       ),
                     ],

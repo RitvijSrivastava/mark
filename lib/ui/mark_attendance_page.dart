@@ -60,6 +60,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
   Future<void> verifyFace() async {
     FaceRecognition faceRecognition = new FaceRecognition();
     await getImage();
+    if(_image == null) return;
     var statusFace = await faceRecognition.recogImage(_image, widget.userId);
     setState(() {
       _statusFace = statusFace;
@@ -126,6 +127,15 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
 
     FirebaseService firebaseService = new FirebaseService();
     await firebaseService.addData('history', map);
+
+    //Set status as false
+    setState(() {
+      _statusFace = false;
+      _statusLocation = false;
+      _currentStep = 0;
+      msgFace = "Verify Face";
+      msgLocation = "VerifyLocation";
+    });
   }
 
   /// Define what will happen on clicking on continue
@@ -170,14 +180,16 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
                           textScaleFactor: 1.3,
                         ),
                         content: MaterialButton(
+                          
                           padding: EdgeInsets.all(13.0),
                           onPressed: verifyFace,
                           textColor: Colors.white,
                           child: Text(
                             msgFace,
                             textScaleFactor: 1.1,
+                            
                           ),
-                          color: Colors.green,
+                          color: msgFace == "Verified" ? Colors.green : Colors.orange,
                         ),
                         isActive: (_currentStep == 0),
                       ),
@@ -188,13 +200,13 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
                         ),
                         content: MaterialButton(
                           padding: EdgeInsets.all(13.0),
-                          onPressed: verifyFace,
+                          onPressed: verifyLocation,
                           textColor: Colors.white,
                           child: Text(
                             msgLocation,
                             textScaleFactor: 1.1,
                           ),
-                          color: Colors.green,
+                          color: msgLocation == "Verified" ? Colors.green : Colors.orange,
                         ),
                         isActive: (_currentStep == 1),
                       ),
