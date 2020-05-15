@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:attendance/services/authentication.dart';
-import 'package:attendance/ui/admin_page.dart';
+import 'package:attendance/ui/admin_side/admin_page.dart';
 import 'package:attendance/ui/home_page.dart';
 import 'package:attendance/ui/login_page.dart';
 import 'package:flutter/material.dart';

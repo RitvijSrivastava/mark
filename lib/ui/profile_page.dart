@@ -119,7 +119,28 @@ class _ProfilePageState extends State<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       CircleAvatar(
-                        backgroundImage: NetworkImage(emp.image, scale: 0.5),
+                        child: ClipOval(
+                          child: Center(
+                            child: Image.network(
+                              emp.image,
+                              width: 700,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return CircularProgressIndicator(
+                                  backgroundColor: Colors.white,
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes
+                                      : null,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
                         radius: 80.0,
                       ),
                     ],

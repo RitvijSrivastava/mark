@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Employee {
   String userId;
   String storeId;
@@ -92,4 +94,7 @@ class Employee {
     this.experience = map['experience'];
     this.radius = map['radius'];
   }
+
+  Employee.fromSnapshot(DocumentSnapshot snapshot)
+      : this.fromMap(snapshot.data);
 }

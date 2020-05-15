@@ -68,7 +68,8 @@ class _AttendanceHistoryState extends State<AttendanceHistory> {
     final history = History.fromSnapshot(data);
 
     DateTime checkIn = DateTime.parse(history.checkIn);
-    DateTime checkOut = DateTime.parse(history.checkOut);
+    DateTime checkOut;
+    if(history.checkOut != "-") checkOut = DateTime.parse(history.checkOut);
     String hrs = history.hrsSpent;
 
     String date = checkIn.day.toString() +
@@ -77,7 +78,7 @@ class _AttendanceHistoryState extends State<AttendanceHistory> {
         "/" +
         checkIn.year.toString();
     String inTime = checkIn.hour.toString() + ":" + checkIn.minute.toString();
-    String outTime =
+    String outTime = history.checkOut == "-" ? "-" :
         checkOut.hour.toString() + ":" + checkOut.minute.toString();
 
     return DataRow(cells: [

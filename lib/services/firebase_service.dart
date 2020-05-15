@@ -2,12 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseService {
   // Add a map to a firestore collection
-  Future<void> addData(collectionName, Map<dynamic, dynamic> map) async {
-    Firestore.instance.collection(collectionName).add(map).catchError((e) {
+  Future<DocumentReference> addData(collectionName, Map<dynamic, dynamic> map) async {
+    return Firestore.instance.collection(collectionName).add(map).catchError((e) {
       print(e);
     });
   }
 
+
+  /// Store data with user specified document ID
   Future<void> addSpecificData(
       collectionName, docId, Map<dynamic, dynamic> map) async {
     Firestore.instance

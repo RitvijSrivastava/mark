@@ -90,7 +90,11 @@ class Validate {
   /// Radius Verification
   verifyRadius(String radius) {
     bool isValid = isNumeric(radius);
-    if(isValid) return null;
+    if(isValid) {
+      int rad = int.parse(radius);
+      if(rad <=5 ) return "Enter a number greater than 5";
+      else return null;
+    }
     else return "Enter a valid number";
   }
 }

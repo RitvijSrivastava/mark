@@ -7,6 +7,8 @@ import 'package:attendance/services/face_recognition.dart';
 import 'package:attendance/services/firebase_service.dart';
 import 'package:attendance/services/firebase_storage_service.dart';
 import 'package:attendance/services/validate.dart';
+import 'package:attendance/ui/admin_side/list_employee_page.dart';
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,6 +25,13 @@ class AdminPage extends StatefulWidget {
 
 class _AdminPageState extends State<AdminPage> {
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>(); // Form Key
+
+  List appBarText = [
+    'Home',
+    'Employees'
+  ]; // Text appearing as the title of pages
+  int _currentIndex = 0; // stores the current index of page
+  PageController _pageController;
 
   bool _isUploading = false;
   bool _isUserForm = false;
@@ -53,6 +62,14 @@ class _AdminPageState extends State<AdminPage> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = 0;
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   /// Upload Data to Firebase Storage
@@ -189,7 +206,7 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Admin Page"),
+        title: Text(appBarText[_currentIndex]),
         actions: <Widget>[
           IconButton(
             onPressed: widget.logoutCallback,
@@ -197,19 +214,63 @@ class _AdminPageState extends State<AdminPage> {
           ),
         ],
       ),
-      body: _isUserForm
-          ? formUI()
-          : Center(
-              child: MaterialButton(
-                color: Colors.lightBlue,
-                padding: EdgeInsets.all(16.0),
-                onPressed: _toggleForm,
-                child: Text(
-                  "Add Employee",
-                  textScaleFactor: 1.2,
-                ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        children: <Widget>[
+          _isUserForm
+              ? formUI()
+              : Column(
+                children: <Widget>[
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    width: MediaQuery.of(context).size.width * 0.75,
+                    child: Image.asset('assets/logo.png'),),
+                    SizedBox(height: 25.0,),
+                  Center(
+                      child: MaterialButton(
+                        textColor: Colors.white,
+                        color: Colors.lightBlue,
+                        padding: EdgeInsets.all(16.0),
+                        onPressed: _toggleForm,
+                        child: Text(
+                          "Add Employee",
+                          textScaleFactor: 1.3,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
+          ListEmployeePage(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavyBar(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        selectedIndex: _currentIndex,
+        onItemSelected: (index) {
+          _pageController.jumpToPage(index);
+          _pageController.animateToPage(index,
+              duration: Duration(milliseconds: 300), curve: Curves.ease);
+        },
+        items: <BottomNavyBarItem>[
+          BottomNavyBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home'),
+            activeColor: Colors.red,
+            inactiveColor: Colors.black,
+          ),
+          BottomNavyBarItem(
+            icon: Icon(Icons.person),
+            title: Text("Employees"),
+            activeColor: Colors.purpleAccent,
+            inactiveColor: Colors.black,
+          ),
+        ],
+      ),
     );
   }
 
@@ -244,6 +305,17 @@ class _AdminPageState extends State<AdminPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: _toggleForm,
+                          ),
+                        ],
+                      ),
                       _buildSpace(),
                       TextFormField(
                         minLines: 1,
@@ -396,47 +468,58 @@ class _AdminPageState extends State<AdminPage> {
                         ),
                       ),
                       _buildSpace(height: 20.0),
-                      MaterialButton(
-                        color: Colors.blueAccent,
-                        onPressed: _chooseImage,
-                        child: Column(
-                          children: <Widget>[
-                            Text("Choose Image"),
-                            SizedBox(height: 5.0),
-                            _msgImage == null
-                                ? Center()
-                                : Text(
-                                    _msgImage,
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                          ],
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          MaterialButton(
+                            textColor: Colors.black,
+                            padding: EdgeInsets.all(10.0),
+                            color: Colors.pink[50],
+                            onPressed: _chooseImage,
+                            child: Column(
+                              children: <Widget>[
+                                Text("Choose Image", textScaleFactor: 1.2),
+                                SizedBox(height: 5.0),
+                                _msgImage == null
+                                    ? Center()
+                                    : Text(
+                                        _msgImage,
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                              ],
+                            ),
+                          ),
+                          MaterialButton(
+                            textColor: Colors.black,
+                            padding: EdgeInsets.all(10.0),
+                            onPressed: _getLocation,
+                            color: Colors.greenAccent,
+                            child: Column(
+                              children: <Widget>[
+                                Text("Get Location", textScaleFactor: 1.2),
+                                SizedBox(height: 5.0),
+                                _msgLocation == null
+                                    ? Center()
+                                    : Text(
+                                        _msgLocation,
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       _buildSpace(),
-                      MaterialButton(
-                        onPressed: _getLocation,
-                        color: Colors.greenAccent,
-                        child: Column(
-                          children: <Widget>[
-                            Text("Get Location"),
-                            SizedBox(height: 5.0),
-                            _msgLocation == null
-                                ? Center()
-                                : Text(
-                                    _msgLocation,
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                          ],
-                        ),
-                      ),
                       _buildSpace(height: 20.0),
                       Center(
                         child: MaterialButton(
+                          padding: EdgeInsets.all(13.0),
                           onPressed: _submitForm,
+                          textColor: Colors.white,
                           color: Colors.blue,
                           child: Text(
-                            "SUBMIT",
-                            textScaleFactor: 1.2,
+                            "  SUBMIT  ",
+                            textScaleFactor: 1.3,
                           ),
                         ),
                       ),
