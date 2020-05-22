@@ -1,7 +1,7 @@
 import 'package:attendance/models/store.dart';
 import 'package:attendance/services/authentication.dart';
 import 'package:attendance/services/firebase_service.dart';
-import 'package:attendance/ui/admin_side/approval_page.dart';
+import 'package:attendance/ui/admin_side/list_approval_page.dart';
 import 'package:attendance/ui/admin_side/employee_form.dart';
 import 'package:attendance/ui/admin_side/list_employee_page.dart';
 import 'package:attendance/ui/admin_side/store_config_page.dart';
@@ -162,7 +162,7 @@ class _AdminPageState extends State<AdminPage> {
             ],
           ),
           ListEmployeePage(stores: allStores),
-          ApprovalPage(),
+          ListApprovalPage(),
         ],
       ),
       bottomNavigationBar: BottomNavyBar(
