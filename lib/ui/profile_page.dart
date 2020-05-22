@@ -1,4 +1,4 @@
-import 'package:attendance/models/employee.dart';
+ import 'package:attendance/models/employee.dart';
 import 'package:attendance/services/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +106,9 @@ class _ProfilePageState extends State<ProfilePage> {
           }
 
           Employee emp = Employee.fromMap(snapshot.data.documents[0].data);
-          // print("IMGE ID: " + emp.imageId);
+
+          // TODO: Make profile photo editable
+          // TODO: Handle null IMAGES   
 
           return ListView(
             padding: EdgeInsets.all(20.0),

@@ -1,5 +1,5 @@
 import 'package:attendance/services/authentication.dart';
-import 'package:attendance/ui/attendance_history.dart';
+import 'package:attendance/ui/common/attendance_history.dart';
 import 'package:attendance/ui/help_page.dart';
 import 'package:attendance/ui/mark_attendance_page.dart';
 import 'package:attendance/ui/profile_page.dart';

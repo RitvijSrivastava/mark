@@ -91,15 +91,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        // appBar: new AppBar(
-        //   title: new Text('Flutter login demo'),
-        // ),
-        body: Stack(
-      children: <Widget>[
-        _showForm(),
-        _showCircularProgress(),
-      ],
-    ));
+      // appBar: new AppBar(
+      //   title: new Text('Flutter login demo'),
+      // ),
+      body: Stack(
+        children: <Widget>[
+          _showForm(),
+          _showCircularProgress(),
+        ],
+      ),
+    );
   }
 
   Widget _showCircularProgress() {
