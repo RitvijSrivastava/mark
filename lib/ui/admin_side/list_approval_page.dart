@@ -56,6 +56,8 @@ class _ListApprovalPageState extends State<ListApprovalPage> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +68,7 @@ class _ListApprovalPageState extends State<ListApprovalPage> {
               return Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.data == null) {
+            if (snapshot.data.documents.length == 0) {
               return Center(
                 child: Text(
                   "No Approvals Found!",
@@ -174,11 +176,12 @@ class _ImageApprovalPageState extends State<ImageApprovalPage> {
             )
           : ListView(
               children: <Widget>[
+                SizedBox(height: 20.0),
                 Center(
                   child: Image.network(
                     widget.approval.imageId,
-                    height: 120,
-                    width: 100,
+                    height: MediaQuery.of(context).size.height * 0.60,
+                    width: MediaQuery.of(context).size.height * 0.40,
                     fit: BoxFit.cover,
                     loadingBuilder: (BuildContext context, Widget child,
                         ImageChunkEvent loadingProgress) {
