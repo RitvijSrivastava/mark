@@ -99,8 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
           Employee emp = Employee.fromMap(snapshot.data.documents[0].data);
 
-          // TODO: Show a progress indicator when uploading image
-          // TODO: Test with null IMAGES
+          // FIXME: Show a progress indicator when uploading image
 
           return ListView(
             padding: EdgeInsets.all(20.0),

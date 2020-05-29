@@ -1,6 +1,9 @@
 import 'package:attendance/services/authentication.dart';
 import 'package:flutter/material.dart';
 
+// TODO: Add Phoe Authentication
+// TODO: Redesign the UI (firebaseUI)
+
 class LoginPage extends StatefulWidget {
   final VoidCallback loginCallback;
   final BaseAuth auth;
@@ -206,23 +209,24 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget showPrimaryButton() {
     return new Padding(
-        padding: EdgeInsets.fromLTRB(0.0, 45.0, 0.0, 0.0),
-        child: SizedBox(
-          height: 40.0,
-          child: new RaisedButton(
-            elevation: 5.0,
-            shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0)),
-            color: Colors.blue,
-            child: new Text(
-              'Login',
-              style: new TextStyle(
-                fontSize: 20.0,
-                color: Colors.white,
-              ),
+      padding: EdgeInsets.fromLTRB(0.0, 45.0, 0.0, 0.0),
+      child: SizedBox(
+        height: 40.0,
+        child: new RaisedButton(
+          elevation: 5.0,
+          shape: new RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(30.0)),
+          color: Colors.blue,
+          child: new Text(
+            'Login',
+            style: new TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
             ),
-            onPressed: validateAndSubmit,
           ),
-        ));
+          onPressed: validateAndSubmit,
+        ),
+      ),
+    );
   }
 }

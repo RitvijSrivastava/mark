@@ -59,7 +59,7 @@ class FaceRecognition {
 
   /// Returns [true] if confidence > 65% and imageId = name
   Future<bool> recogImage(File file, String imageId) async {
-    // TODO: Receive the store name also
+    
 
     dio.options.headers = {
       "x-rapidapi-host": kairosURL,
@@ -69,7 +69,7 @@ class FaceRecognition {
 
     try {
       String base64Image = base64Encode(file.readAsBytesSync());
-
+      // TODO: Receive the store name also
       response = await dio.post(
         "https://kairosapi-karios-v1.p.rapidapi.com/recognize",
         data: {
