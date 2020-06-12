@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:attendance/models/history.dart';
 import 'package:attendance/services/face_recognition.dart';
 import 'package:attendance/services/firebase_service.dart';
@@ -8,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-// TODO: Mapbox in location
 
 class MarkAttendancePage extends StatefulWidget {
   final String userId;
@@ -84,20 +81,22 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
       msgLocation = "Verify Location";
     });
 
-    if(chkIn != null) setState(() {
-      checkInTime = DateTime.parse(chkIn);
-    });
+    if (chkIn != null)
+      setState(() {
+        checkInTime = DateTime.parse(chkIn);
+      });
   }
 
   // Pick Image from the camera
   Future getImage() async {
-    var image = await ImagePicker.pickImage(
+    final _picker = ImagePicker();
+    var image = await _picker.getImage(
       source: ImageSource.camera,
       imageQuality: 100,
       preferredCameraDevice: CameraDevice.front,
     );
     setState(() {
-      _image = image;
+      _image = File(image.path);
     });
   }
 
@@ -159,12 +158,6 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     }
   }
 
-  // verfiyAndCheckIn() async {
-  //   if(_statusFace && _statusLocation) {
-  //     await checkIn();
-  //   }
-  // }
-
   // Check In
   checkIn() async {
     print("INSIDE CHECKIN");
@@ -196,7 +189,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     prefs.setBool("statusLocation", _statusLocation);
     prefs.setInt("currentStep", _currentStep);
     prefs.setString("docRef", doc);
-    prefs.setString("checkInTime",_checkInTime.toString());
+    prefs.setString("checkInTime", _checkInTime.toString());
 
     print("DOC::: " + prefs.getString('docRef'));
     print("DOC reF cehckin: " + doc);
@@ -204,7 +197,6 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
 
   // Check Out
   checkOut() async {
-
     SharedPreferences prefs = await _prefs;
     DateTime _checkOutTime = DateTime.now();
     setState(() {
@@ -225,7 +217,6 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
 
     FirebaseService firebaseService = new FirebaseService();
 
-    
     // String docRef = _docRef;
 
     print("INSIDE CHECK OUT");
@@ -248,7 +239,6 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     prefs.setBool("statusLocation", false);
     prefs.setInt("currentStep", 0);
     prefs.setString("docRef", null);
-    
   }
 
   /// Define what will happen on clicking on continue

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class BaseAuth {
-  Future<String> signIn(String email, String password);
+  Future<String> signIn(AuthCredential authCredential);
 
   Future<String> signUp(String email, String password);
 
@@ -13,14 +13,18 @@ abstract class BaseAuth {
   Future<void> signOut();
 
   Future<bool> isEmailVerified();
+
+  Future<String> signInWithOTP(String smsCode, String verificationId);
+
+  Future<String> signInWithEmail(String email, String password);
 }
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  Future<String> signIn(String email, String password) async {
-    AuthResult result = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email, password: password);
+  Future<String> signIn(AuthCredential authCredential) async {
+    AuthResult result =
+        await _firebaseAuth.signInWithCredential(authCredential);
     FirebaseUser user = result.user;
     return user.uid;
   }
@@ -29,6 +33,7 @@ class Auth implements BaseAuth {
     AuthResult result = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email, password: password);
     FirebaseUser user = result.user;
+
     return user.uid;
   }
 
@@ -49,5 +54,17 @@ class Auth implements BaseAuth {
   Future<bool> isEmailVerified() async {
     FirebaseUser user = await _firebaseAuth.currentUser();
     return user.isEmailVerified;
+  }
+
+  Future<String> signInWithOTP(String smsCode, String verificationId) async {
+    AuthCredential authCreds = PhoneAuthProvider.getCredential(
+        verificationId: verificationId, smsCode: smsCode);
+    return await signIn(authCreds);
+  }
+
+  Future<String> signInWithEmail(String email, String password) async {
+    AuthCredential authCreds =
+        EmailAuthProvider.getCredential(email: email, password: password);
+    return await signIn(authCreds);
   }
 }

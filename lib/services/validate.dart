@@ -97,4 +97,17 @@ class Validate {
     }
     else return "Enter a valid number";
   }
+
+  /// OTP verification
+  verifyOTP(String otp) {
+    bool isValid = isNumeric(otp);
+    if(isValid) {
+      if(otp.length != 6) {
+        return "Enter a valid otp";
+      }else {
+        return null;
+      }
+    }
+    else return "Enter a valid otp";
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+//TODO: Add Fields for editing other factors too
 class Approval {
   String empId;
   String empName;

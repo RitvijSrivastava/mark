@@ -19,14 +19,19 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>(); // scaffold key
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // scaffold key
   File image;
+  bool requestChange;
 
   @override
   void initState() {
     super.initState();
+    requestChange = false;
   }
+
+  //TODO: Change the Approval Process to include other changes as well
+  //TODO: Create a form to change all the fields...can be null...change only what is needed 
 
   /// Send the image for approval
   _changeImage(Employee emp) async {
@@ -34,6 +39,11 @@ class _ProfilePageState extends State<ProfilePage> {
     await _chooseImage();
 
     if (image == null) return; // Cancelled image change
+
+    // Set [requestChange] to true
+    setState(() {
+      requestChange = true;
+    });
 
     FirebaseService firebaseService = new FirebaseService();
     FirebaseStorageService firebaseStorageService =
@@ -57,16 +67,21 @@ class _ProfilePageState extends State<ProfilePage> {
     // Display success message on screen
     showInSnackBar(
         "Sent Image for approval successfully", Duration(seconds: 2));
+
+    setState(() {
+      requestChange = false;
+    });
   }
 
   /// Choose imAge from front camera
   _chooseImage() async {
-    var img = await ImagePicker.pickImage(
+    final _picker = ImagePicker();
+    PickedFile img = await _picker.getImage(
         source: ImageSource.camera,
         imageQuality: 100,
         preferredCameraDevice: CameraDevice.front);
     setState(() {
-      image = img;
+      image = File(img.path);
     });
   }
 
@@ -99,117 +114,132 @@ class _ProfilePageState extends State<ProfilePage> {
 
           Employee emp = Employee.fromMap(snapshot.data.documents[0].data);
 
-          // FIXME: Show a progress indicator when uploading image
-
-          return ListView(
-            padding: EdgeInsets.all(20.0),
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+          return requestChange
+              ? Center(
+                  child: ListView(
                     children: <Widget>[
-                      InkWell(
-                        onTap: () => _changeImage(emp),
-                        child: CircleAvatar(
-                          child: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: <Widget>[
-                              ClipOval(
-                                child: Center(
-                                  child: emp.image == null
-                                      ? Container(
-                                          color: Colors.blue,
-                                          child: Center(
-                                            child: Text(
-                                              "Add Image",
-                                              textScaleFactor: 1.1,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                              maxLines: 2,
-                                            ),
-                                          ),
-                                        )
-                                      : Image.network(
-                                          emp.image,
-                                          width: 700,
-                                          fit: BoxFit.cover,
-                                          loadingBuilder: (BuildContext context,
-                                              Widget child,
-                                              ImageChunkEvent loadingProgress) {
-                                            if (loadingProgress == null)
-                                              return child;
-                                            return CircularProgressIndicator(
-                                              backgroundColor: Colors.white,
-                                              value: loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      loadingProgress
-                                                          .expectedTotalBytes
-                                                  : null,
-                                            );
-                                          },
-                                        ),
-                                ),
-                              ),
-                              CircleAvatar(
-                                  backgroundColor: Colors.grey,
-                                  child: Icon(Icons.edit,
-                                      size: 25.0, color: Colors.white)),
-                            ],
-                          ),
-                          radius: 80.0,
-                        ),
+                      CircularProgressIndicator(),
+                      SizedBox(height: 20.0),
+                      Text(
+                        "Sending request for changes...",
+                        textScaleFactor: 1.1,
                       ),
                     ],
                   ),
-                  _buildSpace(),
-                  _buildSpace(),
-                  _buildRow(
-                    label1: "First Name",
-                    label2: "Last Name",
-                    content1: emp.first,
-                    content2: emp.last,
-                  ),
-                  _buildRow(
-                    label1: "Email Id",
-                    label2: "Mobile",
-                    content1: emp.email,
-                    content2: emp.phone,
-                  ),
-                  _buildRow(
-                    label1: "Experience",
-                    label2: "Expertise",
-                    content1:
-                        emp.exp == "1" ? emp.exp + " year" : emp.exp + " years",
-                    content2: emp.specialization,
-                  ),
-                  _buildAddressRow(
-                      label1: "Address",
-                      label2: "Aadhar No.",
-                      content1: emp.addr,
-                      content2: emp.aadhar),
-                  Center(
-                    child: MaterialButton(
-                      padding: EdgeInsets.all(12.0),
-                      textColor: Colors.white,
-                      onPressed: widget.logoutCallback,
-                      child: Text(
-                        "Sign Out",
-                        textScaleFactor: 1.2,
-                      ),
-                      color: Colors.red,
+                )
+              : ListView(
+                  padding: EdgeInsets.all(20.0),
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            InkWell(
+                              onTap: () => _changeImage(emp),
+                              child: CircleAvatar(
+                                child: Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: <Widget>[
+                                    ClipOval(
+                                      child: Center(
+                                        child: emp.image == null
+                                            ? Container(
+                                                color: Colors.blue,
+                                                child: Center(
+                                                  child: Text(
+                                                    "Add Image",
+                                                    textScaleFactor: 1.1,
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                    maxLines: 2,
+                                                  ),
+                                                ),
+                                              )
+                                            : Image.network(
+                                                emp.image,
+                                                width: 700,
+                                                fit: BoxFit.cover,
+                                                loadingBuilder:
+                                                    (BuildContext context,
+                                                        Widget child,
+                                                        ImageChunkEvent
+                                                            loadingProgress) {
+                                                  if (loadingProgress == null)
+                                                    return child;
+                                                  return CircularProgressIndicator(
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    value: loadingProgress
+                                                                .expectedTotalBytes !=
+                                                            null
+                                                        ? loadingProgress
+                                                                .cumulativeBytesLoaded /
+                                                            loadingProgress
+                                                                .expectedTotalBytes
+                                                        : null,
+                                                  );
+                                                },
+                                              ),
+                                      ),
+                                    ),
+                                    CircleAvatar(
+                                        backgroundColor: Colors.grey,
+                                        child: Icon(Icons.edit,
+                                            size: 25.0, color: Colors.white)),
+                                  ],
+                                ),
+                                radius: 80.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        _buildSpace(),
+                        _buildSpace(),
+                        _buildRow(
+                          label1: "First Name",
+                          label2: "Last Name",
+                          content1: emp.first,
+                          content2: emp.last,
+                        ),
+                        _buildRow(
+                          label1: "Email Id",
+                          label2: "Mobile",
+                          content1: emp.email,
+                          content2: emp.phone,
+                        ),
+                        _buildRow(
+                          label1: "Experience",
+                          label2: "Expertise",
+                          content1: emp.exp == "1"
+                              ? emp.exp + " year"
+                              : emp.exp + " years",
+                          content2: emp.specialization,
+                        ),
+                        _buildAddressRow(
+                            label1: "Address",
+                            label2: "Aadhar No.",
+                            content1: emp.addr,
+                            content2: emp.aadhar),
+                        Center(
+                          child: MaterialButton(
+                            padding: EdgeInsets.all(12.0),
+                            textColor: Colors.white,
+                            onPressed: widget.logoutCallback,
+                            child: Text(
+                              "Sign Out",
+                              textScaleFactor: 1.2,
+                            ),
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ],
-          );
+                  ],
+                );
         },
       ),
     );
