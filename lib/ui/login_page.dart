@@ -66,9 +66,11 @@ class _LoginPageState extends State<LoginPage> {
       try {
         if (_codeSent) {
           userId = await widget.auth.signInWithOTP(_smsCode, _verId);
+          widget.loginCallback();
           print("Signed in using $userId");
         } else {
           userId = await widget.auth.signInWithEmail(_email, _password);
+          widget.loginCallback();
           print("Signed in using $userId");
         }
       } catch (e) {
@@ -85,6 +87,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> verifyPhone(phoneNo) async {
     final PhoneVerificationCompleted verified = (AuthCredential authResult) {
       widget.auth.signIn(authResult);
+      widget.loginCallback();
     };
 
     final PhoneVerificationFailed verificationfailed =
@@ -107,11 +110,10 @@ class _LoginPageState extends State<LoginPage> {
 
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: "+91" + phoneNo,
-      timeout: const Duration(seconds: 60),
+      timeout: const Duration(seconds: 0), // Duration 0 to disable instant verification by Play Services
       verificationCompleted: verified,
       verificationFailed: verificationfailed,
       codeSent: smsSent,
-      forceResendingToken: 60,
       codeAutoRetrievalTimeout: autoTimeout,
     );
   }

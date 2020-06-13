@@ -63,6 +63,9 @@ class _EmployeeFormState extends State<EmployeeForm> {
     return tempList;
   }
 
+  // TODO: Link Phone and Email Accounts together
+  // TODO: Make a step process? Like email+password -> phone number+verification -> link in background -> other informations -> upload everthing to firebase?
+
   /// Upload Data to Firebase Storage
   _uploadToFirebase() async {
     FirebaseService firebaseService = new FirebaseService();
@@ -88,7 +91,7 @@ class _EmployeeFormState extends State<EmployeeForm> {
       firstName: firstName,
       lastName: lastName,
       storeId: "123",
-      imageId: null,
+      imageId: null, // Store null always...the user will upload the image 
       emailId: emailId,
       phoneNumber: mobile,
       specialization: expertise,
