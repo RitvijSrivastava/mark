@@ -1,6 +1,6 @@
-# Attendance Management System
+# Mark
 
-An attendance marking mobile application built using flutter. Makes use of facial recognition and location to mark attendance
+Mark is an attendance marking mobile application built using flutter. Makes use of facial recognition and location to mark attendance
 Backend is hosted on firebase.
 
 ## Getting Started
